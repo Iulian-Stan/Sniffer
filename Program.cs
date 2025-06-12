@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.Security.Principal;
 
-namespace Sniffer
+namespace NetworkSniffer
 {
     static class Program
     {
@@ -39,7 +39,7 @@ namespace Sniffer
             }
             catch (Win32Exception)
             {
-                //Do nothing. Probably the user canceled the UAC window
+                //Do nothing. Probably the user canceled the UAC window.
             }
         }
     }

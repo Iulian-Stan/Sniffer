@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Windows.Forms;
 
-namespace Sniffer
+namespace NetworkSniffer
 {
     public enum Protocol
     {
@@ -19,7 +19,7 @@ namespace Sniffer
         private byte[] dataBuffer = new byte[8192];
         private bool stateFlag = false;                   //flagul setat pt prinderea pachetelor
         private byte pachet = 15;
-        private Action<TreeNode> AddTreeNode;
+        private readonly Action<TreeNode> AddTreeNode;
 
         //private delegate void AddTreeNode(TreeNode node);
 
@@ -29,7 +29,7 @@ namespace Sniffer
             AddTreeNode = new Action<TreeNode>(OnTreeNode_Add);
         }
 
-        private void state(bool State)
+        private void State(bool State)
         {
             if (State)
             {
@@ -50,7 +50,7 @@ namespace Sniffer
         {
             if (cmbInterfaces.Text == "")
             {
-                MessageBox.Show("Alegeti interfata pentru capturarea pachetelor.", "Sniffer",
+                MessageBox.Show("Alegeti interfata pentru capturarea pachetelor.", "NetworkSniffer",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -60,7 +60,7 @@ namespace Sniffer
                 {
                     //incepe capturarea pachetelor
 
-                    state(true);
+                    State(true);
 
                     mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
 
@@ -72,8 +72,8 @@ namespace Sniffer
                                                SocketOptionName.HeaderIncluded, //include header-ul
                                                true);                           //optiuni
 
-                    byte[] inBytes = new byte[4] { 1, 0, 0, 0 };
-                    byte[] outBytes = new byte[4] { 1, 0, 0, 0 }; //prinde pachetele ce ies
+                    byte[] inBytes = [1, 0, 0, 0];
+                    byte[] outBytes = [1, 0, 0, 0]; //prinde pachetele ce ies
 
                     //Socket.IOControl este analog metodei WSAIoctl din Winsock 2
                     mySocket.IOControl(IOControlCode.ReceiveAll,              //echivalent cu SIO_RCVALL din Winsock 2
@@ -86,14 +86,14 @@ namespace Sniffer
                 }
                 else
                 {
-                    state(false);
+                    State(false);
                     //inchiderea socket-ului
                     mySocket.Close();
                 }
             }
             catch (SocketException ex)
             {
-                MessageBox.Show(ex.Message + "\n" + "Probleme legate de socket !", "Sniffer",
+                MessageBox.Show(ex.Message + "\n" + "Probleme legate de socket !", "NetworkSniffer",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
@@ -122,18 +122,18 @@ namespace Sniffer
             }
             catch (SocketException se)
             {
-                MessageBox.Show(se.Message + "\n" + "Probleme legate de receptie !", "Sniffer",
+                MessageBox.Show(se.Message + "\n" + "Probleme legate de receptie !", "NetworkSniffer",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void ParseData(byte[] byteData, int nReceived)
         {
-            TreeNode rootNode = new TreeNode();
+            TreeNode rootNode = new ();
 
             //Intru cit toate pachetele is de tip ip , 
             //scoatem header-ul si determinam tipul pachetului
-            AntetIP ipHeader = new AntetIP(byteData, nReceived);
+            HeaderIP ipHeader = new (byteData, nReceived);
 
             if ((pachet & 1) == 1)
             {
@@ -142,11 +142,11 @@ namespace Sniffer
             }
 
             //acum analizam continutul 
-            switch (ipHeader.ProtocolType)
+            switch (ipHeader.Protocol)
             {
                 case Protocol.ICMP:
 
-                    AntetICMP icmpHeader = new AntetICMP(ipHeader.Data,             //data continuta in pachetul IP
+                    HeaderICMP icmpHeader = new (ipHeader.Data,             //data continuta in pachetul IP
                                                         ipHeader.MessageLength);    //lungimea datei                    
                     if ((pachet & 2) == 2)
                     {
@@ -158,7 +158,7 @@ namespace Sniffer
 
                 case Protocol.TCP:
 
-                    AntetTCP tcpHeader = new AntetTCP(ipHeader.Data,              //data continuta in pachetul IP
+                    AntetTCP tcpHeader = new (ipHeader.Data,              //data continuta in pachetul IP
                                                         ipHeader.MessageLength);    //lungimea datei                    
                     if ((pachet & 4) == 4)
                     {
@@ -170,7 +170,7 @@ namespace Sniffer
                     //DNS suporta ambele protocoale de aceea testam de 2 ori
                     if ((tcpHeader.DestinationPort == "53" || tcpHeader.SourcePort == "53") && (pachet & 16) == 16)
                     {
-                        TreeNode dnsNode = MakeDNSTreeNode(tcpHeader.Data, (int)tcpHeader.MessageLength);
+                        TreeNode dnsNode = MakeDNSTreeNode(tcpHeader.Data, (int)tcpHeader.DataLength);
                         rootNode.Nodes.Add(dnsNode);
                     }
 
@@ -178,7 +178,7 @@ namespace Sniffer
 
                 case Protocol.UDP:
 
-                    AntetUDP udpHeader = new AntetUDP(ipHeader.Data,              //pachetul UDP continut de IP
+                    HeaderUDP udpHeader = new (ipHeader.Data,              //pachetul UDP continut de IP
                                                        (int)ipHeader.MessageLength);//lungimea pachetului                  
                     if ((pachet & 8) == 8)
                     {
@@ -206,25 +206,26 @@ namespace Sniffer
                     ipHeader.DestinationAddress.ToString();
 
                 //adaugarea nodurilor la arbore
-                treeView.Invoke(AddTreeNode, new object[] { rootNode });
+                treeView.Invoke(AddTreeNode, [rootNode]);
             }
         }
 
         //constructorul unui nod IP
-        private TreeNode MakeIPTreeNode(AntetIP ipHeader)
+        private static TreeNode MakeIPTreeNode(HeaderIP ipHeader)
         {
-            TreeNode ipNode = new TreeNode();
-
-            ipNode.Text = "IP";
-            ipNode.Nodes.Add("Versiune: " + ipHeader.Version);
-            ipNode.Nodes.Add("Lungime header: " + ipHeader.HeaderLength);
-            ipNode.Nodes.Add("Servicii diferentiate: " + ipHeader.DifferentiatedServices);
-            ipNode.Nodes.Add("Lungimea totala: " + ipHeader.TotalLength);
-            ipNode.Nodes.Add("Identificare: " + ipHeader.Identification);
-            ipNode.Nodes.Add("Flag-uri: " + ipHeader.Flags);
-            ipNode.Nodes.Add("Offset-ul fragmentarii: " + ipHeader.FragmentationOffset);
-            ipNode.Nodes.Add("Time to live: " + ipHeader.TTL);
-            switch (ipHeader.ProtocolType)
+            TreeNode ipNode = new()
+            {
+                Text = "IP"
+            };
+            ipNode.Nodes.Add("Version: " + ipHeader.Version);
+            ipNode.Nodes.Add("Headre length: " + ipHeader.HeaderLength);
+            ipNode.Nodes.Add("Type of services: " + ipHeader.TypeOfService);
+            ipNode.Nodes.Add("Total length: " + ipHeader.TotalLength);
+            ipNode.Nodes.Add("Identification: " + ipHeader.Identification);
+            ipNode.Nodes.Add("ControlBits: " + ipHeader.Flags);
+            ipNode.Nodes.Add("Fragment offset: " + ipHeader.FragmentOffset);
+            ipNode.Nodes.Add("Time to live: " + ipHeader.TimeToLive);
+            switch (ipHeader.Protocol)
             {
                 case Protocol.TCP:
                     ipNode.Nodes.Add("Protocol: " + "TCP");
@@ -236,43 +237,44 @@ namespace Sniffer
                     ipNode.Nodes.Add("Protocol: " + "Unknown");
                     break;
             }
-            ipNode.Nodes.Add("CRC: " + ipHeader.Checksum);
-            ipNode.Nodes.Add("Sursa: " + ipHeader.SourceAddress.ToString());
-            ipNode.Nodes.Add("Destinatia: " + ipHeader.DestinationAddress.ToString());
+            ipNode.Nodes.Add("Checksum: " + ipHeader.Checksum);
+            ipNode.Nodes.Add("Source Address: " + ipHeader.SourceAddress.ToString());
+            ipNode.Nodes.Add("Destination Address: " + ipHeader.DestinationAddress.ToString());
             return ipNode;
         }
 
         //constructorul unui nod ICMP
-        private TreeNode MakeICMPTreeNode(AntetICMP icmpHeader)
+        private static TreeNode MakeICMPTreeNode(HeaderICMP icmpHeader)
         {
-            TreeNode icmpNode = new TreeNode();
-
-            icmpNode.Text = "ICMP";
-            icmpNode.Nodes.Add("Tip ICMP: " + icmpHeader.ICMPType);
-            icmpNode.Nodes.Add("Tip cod: " + icmpHeader.CodeType);
-            icmpNode.Nodes.Add("CRC: " + icmpHeader.Checksum);
-            icmpNode.Nodes.Add("Mesaj: " + icmpHeader.Message());
+            TreeNode icmpNode = new()
+            {
+                Text = "ICMP"
+            };
+            icmpNode.Nodes.Add("Type: " + icmpHeader.Type);
+            icmpNode.Nodes.Add("Code: " + icmpHeader.Code);
+            icmpNode.Nodes.Add("Checksum: " + icmpHeader.Checksum);
+            icmpNode.Nodes.Add("Data: " + icmpHeader.Message);
 
             return icmpNode;
         }
 
         //constructorul unui nod TCP
-        private TreeNode MakeTCPTreeNode(AntetTCP tcpHeader)
+        private static TreeNode MakeTCPTreeNode(AntetTCP tcpHeader)
         {
-            TreeNode tcpNode = new TreeNode();
-
-            tcpNode.Text = "TCP";
-
-            tcpNode.Nodes.Add("Portul sursei: " + tcpHeader.SourcePort);
-            tcpNode.Nodes.Add("Portul destinatiei: " + tcpHeader.DestinationPort);
-            tcpNode.Nodes.Add("Numarul secventei: " + tcpHeader.SequenceNumber);
+            TreeNode tcpNode = new()
+            {
+                Text = "TCP"
+            };
+            tcpNode.Nodes.Add("Source port: " + tcpHeader.SourcePort);
+            tcpNode.Nodes.Add("Destination port: " + tcpHeader.DestinationPort);
+            tcpNode.Nodes.Add("Sequence number: " + tcpHeader.SequenceNumber);
 
             if (tcpHeader.AcknowledgementNumber != "")
-                tcpNode.Nodes.Add("Numarul de confirmare: " + tcpHeader.AcknowledgementNumber);
+                tcpNode.Nodes.Add("Acknowledgement number: " + tcpHeader.AcknowledgementNumber);
 
             tcpNode.Nodes.Add("Lungimea header-ului: " + tcpHeader.HeaderLength);
-            tcpNode.Nodes.Add("Flag-uri: " + tcpHeader.Flags);
-            tcpNode.Nodes.Add("Dimensiunea ferestrei: " + tcpHeader.WindowSize);
+            tcpNode.Nodes.Add("Flag-uri: " + tcpHeader.ControlBits);
+            tcpNode.Nodes.Add("Dimensiunea ferestrei: " + tcpHeader.Window);
             tcpNode.Nodes.Add("CRC: " + tcpHeader.Checksum);
 
             if (tcpHeader.UrgentPointer != "")
@@ -282,11 +284,12 @@ namespace Sniffer
         }
 
         //constructorul unui nod UDP
-        private TreeNode MakeUDPTreeNode(AntetUDP udpHeader)
+        private static TreeNode MakeUDPTreeNode(HeaderUDP udpHeader)
         {
-            TreeNode udpNode = new TreeNode();
-
-            udpNode.Text = "UDP";
+            TreeNode udpNode = new()
+            {
+                Text = "UDP"
+            };
             udpNode.Nodes.Add("Portul sursei: " + udpHeader.SourcePort);
             udpNode.Nodes.Add("Portul destinatiei: " + udpHeader.DestinationPort);
             udpNode.Nodes.Add("Lungime: " + udpHeader.Length);
@@ -295,20 +298,26 @@ namespace Sniffer
             return udpNode;
         }
 
-        //constructorul unui nod DNS
-        private TreeNode MakeDNSTreeNode(byte[] byteData, int nLength)
+        /// <summary>
+        /// DNS tree node constructor
+        /// </summary>
+        /// <param name="byteData"></param>
+        /// <param name="nLength"></param>
+        /// <returns></returns>
+        private static TreeNode MakeDNSTreeNode(byte[] byteData, int nLength)
         {
-            AntetDNS dnsHeader = new AntetDNS(byteData, nLength);
+            HeaderDNS dnsHeader = new (byteData, nLength);
 
-            TreeNode dnsNode = new TreeNode();
-
-            dnsNode.Text = "DNS";
-            dnsNode.Nodes.Add("IDentificare: " + dnsHeader.Identification);
-            dnsNode.Nodes.Add("Flaguri: " + dnsHeader.Flags);
-            dnsNode.Nodes.Add("Intrebari: " + dnsHeader.TotalQuestions);
-            dnsNode.Nodes.Add("Rasouns RR: " + dnsHeader.TotalAnswerRRs);
-            dnsNode.Nodes.Add("Autoritate RR: " + dnsHeader.TotalAuthorityRRs);
-            dnsNode.Nodes.Add("Additional RR: " + dnsHeader.TotalAdditionalRRs);
+            TreeNode dnsNode = new()
+            {
+                Text = "DNS"
+            };
+            dnsNode.Nodes.Add("Identifier: " + dnsHeader.Identifier);
+            dnsNode.Nodes.Add("ControlBits: " + dnsHeader.Flags);
+            dnsNode.Nodes.Add("Questions count: " + dnsHeader.QuestionsCount);
+            dnsNode.Nodes.Add("Answers cound: " + dnsHeader.AnswersCount);
+            dnsNode.Nodes.Add("Name servres count: " + dnsHeader.NameServersCount);
+            dnsNode.Nodes.Add("Additional record count: " + dnsHeader.AdditionalRecordsCount);
 
             return dnsNode;
         }
@@ -318,9 +327,9 @@ namespace Sniffer
             treeView.Nodes.Add(node);
         }
 
-        private void OnSnifferForm_Load(object sender, EventArgs e)
+        private void OnNetworkSnifferForm_Load(object sender, EventArgs e)
         {
-            string strIP = null;
+            string strIP;
 
             IPHostEntry HosyEntry = Dns.GetHostEntry((Dns.GetHostName()));
             if (HosyEntry.AddressList.Length > 0)
@@ -337,7 +346,7 @@ namespace Sniffer
             }
         }
 
-        private void OnSnifferForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void OnNetworkSnifferForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (stateFlag)
             {
