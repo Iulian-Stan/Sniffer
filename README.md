@@ -8,7 +8,7 @@ This application:
 3. analyses underlying protocol and parses header fields for TCP(Transmission Control Protocol), UDP(User Datagram Protocol) & ICMP(Internet Control Message Protocol)
 4. in can also extract DNS(Domain Name System) packets
 from TCP and performs same operation fo header parsing
-
+```
     +-----+     +-----+     +-----+
     | DNS |     | ... | ... | ... |
     +-----+     +-----+     +-----+
@@ -24,7 +24,7 @@ from TCP and performs same operation fo header parsing
       +---------------------------+
       |   Local Network Protocol  |
       +---------------------------+
-
+```
 All the parsed information is displayed in the Windows Forms based user interface.
 
 **Note:** this application requires elevated privileges to access network interfaces.
