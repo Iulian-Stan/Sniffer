@@ -19,7 +19,7 @@ namespace NetworkSniffer
         /// <summary>
         /// 16 bit checksum
         /// </summary>
-        private readonly short _Checksum;  
+        private readonly short _Checksum;
 
         public HeaderICMP(byte[] myBuffer, int nReceived)
         {

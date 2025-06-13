@@ -56,8 +56,7 @@ namespace NetworkSniffer
         /// <summary>
         /// IP packet Data
         /// </summary>
-        private readonly byte[] _Data = new byte[8192];
-
+        private readonly byte[] _Data;
 
         public HeaderIP(byte[] myBuffer, int nReceived)
         {
@@ -67,19 +66,27 @@ namespace NetworkSniffer
 
             _VersionAndHeaderLength = bR.ReadByte();
             _TypeOfServcice = bR.ReadByte();
-            _TotalLength = (ushort)IPAddress.NetworkToHostOrder(bR.ReadUInt16());
-            _Identification = (ushort)IPAddress.NetworkToHostOrder(bR.ReadUInt16());
-            _FlagsAndOffset = (ushort)IPAddress.NetworkToHostOrder(bR.ReadUInt16());
+            _TotalLength = (ushort)IPAddress.NetworkToHostOrder(bR.ReadInt16());
+            _Identification = (ushort)IPAddress.NetworkToHostOrder(bR.ReadInt16());
+            _FlagsAndOffset = (ushort)IPAddress.NetworkToHostOrder(bR.ReadInt16());
             _TimeToLive = bR.ReadByte();
             _Protocol = bR.ReadByte();
             _Checksum = IPAddress.NetworkToHostOrder(bR.ReadInt16());
             _SourceAddress = bR.ReadUInt32();
             _DestinationAddress = bR.ReadUInt32();
 
-            _HeaderLength = (byte)(_VersionAndHeaderLength & 0xF * 4);
+            _HeaderLength = (byte)((_VersionAndHeaderLength & 0xF) << 2);
 
             // copy the data that follows after the header
-            Array.Copy(myBuffer, _HeaderLength, _Data, 0, _TotalLength - _HeaderLength);
+            if (_TotalLength - _HeaderLength > 0)
+            {
+                _Data = new byte[_TotalLength - _HeaderLength];
+                Array.Copy(myBuffer, _HeaderLength, _Data, 0, _TotalLength - _HeaderLength);
+            }
+            else
+            {
+                System.Diagnostics.Trace.TraceError("Invalid packet length.");
+            }
         }
 
         public string Version

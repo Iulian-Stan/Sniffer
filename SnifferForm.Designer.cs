@@ -44,9 +44,9 @@ namespace NetworkSniffer
             this.statusStrip.SuspendLayout();
             this.groupBox.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // treeView
-            // 
+            //
             this.treeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
@@ -54,9 +54,9 @@ namespace NetworkSniffer
             this.treeView.Name = "treeView";
             this.treeView.Size = new System.Drawing.Size(306, 164);
             this.treeView.TabIndex = 0;
-            // 
+            //
             // cmbInterfaces
-            // 
+            //
             this.cmbInterfaces.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.cmbInterfaces.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbInterfaces.FormattingEnabled = true;
@@ -64,9 +64,9 @@ namespace NetworkSniffer
             this.cmbInterfaces.Name = "cmbInterfaces";
             this.cmbInterfaces.Size = new System.Drawing.Size(221, 21);
             this.cmbInterfaces.TabIndex = 2;
-            // 
+            //
             // btnStart
-            // 
+            //
             this.btnStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnStart.Location = new System.Drawing.Point(336, 138);
             this.btnStart.Name = "btnStart";
@@ -75,9 +75,9 @@ namespace NetworkSniffer
             this.btnStart.Text = "&Start";
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.OnBtnStart_Click);
-            // 
+            //
             // menuStrip
-            // 
+            //
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
@@ -85,32 +85,32 @@ namespace NetworkSniffer
             this.menuStrip.Size = new System.Drawing.Size(421, 24);
             this.menuStrip.TabIndex = 3;
             this.menuStrip.Text = "menuStrip";
-            // 
+            //
             // fileToolStripMenuItem
-            // 
+            //
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.nouToolStripMenuItem,
             this.iesiToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
             this.fileToolStripMenuItem.Text = "NetworkSniffer";
-            // 
+            //
             // nouToolStripMenuItem
-            // 
+            //
             this.nouToolStripMenuItem.Name = "nouToolStripMenuItem";
             this.nouToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.nouToolStripMenuItem.Text = "Nou";
             this.nouToolStripMenuItem.Click += new System.EventHandler(this.OnNouToolStripMenuItem_Click);
-            // 
+            //
             // iesiToolStripMenuItem
-            // 
+            //
             this.iesiToolStripMenuItem.Name = "iesiToolStripMenuItem";
             this.iesiToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.iesiToolStripMenuItem.Text = "Iesi";
             this.iesiToolStripMenuItem.Click += new System.EventHandler(this.OnIesiToolStripMenuItem_Click);
-            // 
+            //
             // checkedListBox
-            // 
+            //
             this.checkedListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
@@ -127,9 +127,9 @@ namespace NetworkSniffer
             this.checkedListBox.Size = new System.Drawing.Size(69, 79);
             this.checkedListBox.TabIndex = 4;
             this.checkedListBox.SelectedIndexChanged += new System.EventHandler(this.OncheckedListBox_Changed);
-            // 
+            //
             // statusStrip
-            // 
+            //
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel,
             this.toolStripProgressBar});
@@ -138,20 +138,20 @@ namespace NetworkSniffer
             this.statusStrip.Size = new System.Drawing.Size(421, 22);
             this.statusStrip.TabIndex = 5;
             this.statusStrip.Text = "statusStrip";
-            // 
+            //
             // toolStripStatusLabel
-            // 
+            //
             this.toolStripStatusLabel.Name = "toolStripStatusLabel";
             this.toolStripStatusLabel.Size = new System.Drawing.Size(51, 17);
             this.toolStripStatusLabel.Text = "Stopped";
-            // 
+            //
             // toolStripProgressBar
-            // 
+            //
             this.toolStripProgressBar.Name = "toolStripProgressBar";
             this.toolStripProgressBar.Size = new System.Drawing.Size(350, 16);
-            // 
+            //
             // groupBox
-            // 
+            //
             this.groupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox.Controls.Add(this.checkedListBox);
@@ -161,9 +161,9 @@ namespace NetworkSniffer
             this.groupBox.TabIndex = 6;
             this.groupBox.TabStop = false;
             this.groupBox.Text = "Filtru";
-            // 
+            //
             // NetworkSnifferForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(421, 266);

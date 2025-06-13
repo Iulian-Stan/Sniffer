@@ -10,7 +10,7 @@ namespace NetworkSniffer
     public class HeaderUDP
     {
         /// <summary>
-        /// 16 bit source port       
+        /// 16 bit source port
         /// </summary>
         private readonly ushort _SourcePort;
         /// <summary>
@@ -22,14 +22,14 @@ namespace NetworkSniffer
         /// </summary>
         private readonly ushort _Length;
         /// <summary>
-        /// 16 bit checksum            
+        /// 16 bit checksum
         /// </summary>
         private readonly short _Checksum;
 
         /// <summary>
         /// USP packet data
         /// </summary>
-        private readonly byte[] _Data = new byte[8192];
+        private readonly byte[] _Data;
 
         public HeaderUDP(byte[] myBuffer, int nReceived)
         {
@@ -42,6 +42,7 @@ namespace NetworkSniffer
             _Checksum = (short)IPAddress.NetworkToHostOrder(bR.ReadUInt16());
 
             // copy the data that follows after the header
+            _Data = new byte[nReceived - 8];
             Array.Copy(myBuffer, 8, _Data, 0, nReceived - 8);
         }
 

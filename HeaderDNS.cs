@@ -9,7 +9,7 @@ namespace NetworkSniffer
     public class HeaderDNS
     {
         /// <summary>
-        /// 16 bit identifier 
+        /// 16 bit identifier
         /// </summary>
         private readonly ushort _Identifier;
         /// <summary>

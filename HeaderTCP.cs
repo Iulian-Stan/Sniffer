@@ -53,7 +53,7 @@ namespace NetworkSniffer
         /// <summary>
         /// TCP Packet Data
         /// </summary>
-        private readonly byte[] _Data = new byte[8192];
+        private readonly byte[] _Data;
 
         public AntetTCP(byte[] myBuffer, int nReceived)
         {
@@ -70,10 +70,11 @@ namespace NetworkSniffer
             _Checksum = (short)IPAddress.NetworkToHostOrder(bR.ReadUInt16());
             _UrgentPointer = (ushort)IPAddress.NetworkToHostOrder(bR.ReadUInt16());
 
-            _HeaderLength = (byte)(_DataOffsetAndControlBits >> 12 * 4);
+            _HeaderLength = (byte)((_DataOffsetAndControlBits >> 12) << 2);
             _DataLength = (ushort)(nReceived - _HeaderLength);
 
             // copy the data that follows after the header
+            _Data = new byte[nReceived - _HeaderLength];
             Array.Copy(myBuffer, _HeaderLength, _Data, 0, nReceived - _HeaderLength);
         }
 
