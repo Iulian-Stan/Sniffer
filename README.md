@@ -10,7 +10,7 @@ This application:
 from TCP and performs same operation fo header parsing
 ```
     +-----+     +-----+     +-----+
-    | DNS |     | ... | ... | ... |
+    | DNS |     | DNS | ... | ... |
     +-----+     +-----+     +-----+
        |           |           |
     +-----+     +-----+     +-----+
