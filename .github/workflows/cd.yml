@@ -47,7 +47,7 @@ jobs:
 
     # Archive the executable and resources
     - name: Archive build artifacts
-      run: Compress-Archive -Path bin/Release/net8.0-windows7.0/* -Destination $env:Artifact_Name.zip
+      run: Compress-Archive -Path bin/Release/net8.0-windows7.0/* -Destination ${{ env.Artifact_Name }}.zip
 
     # Create release
     - name: Release
